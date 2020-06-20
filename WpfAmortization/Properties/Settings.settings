@@ -1,0 +1,30 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="WpfAmortization.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="Tax" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">734</Value>
+    </Setting>
+    <Setting Name="Apr" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">5.75</Value>
+    </Setting>
+    <Setting Name="Period" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">56</Value>
+    </Setting>
+    <Setting Name="AltStart" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="DownPayment" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="Insurance" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">1072</Value>
+    </Setting>
+    <Setting Name="AltPmt" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">1600</Value>
+    </Setting>
+    <Setting Name="LoanAmount" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">31200</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
