@@ -89,6 +89,7 @@
   <ItemGroup>
     <Compile Include="IAmort.cs" />
     <Compile Include="PaymentDetail.cs" />
+    <Compile Include="PaymentProperty.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AmortSvc.cs" />
     <Compile Include="RequestResponse\CalculateAmortizationRequest.cs" />

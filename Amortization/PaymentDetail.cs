@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace Amortization
@@ -38,6 +39,23 @@ namespace Amortization
             PaymentNo = 0;
             Insurance = 0d;
             Principle = 0d;
+        }
+
+        // ------------------------------------------------
+
+        public List<PaymentProperty> GetProperties()
+        {
+            var retVal = new List<PaymentProperty>();
+
+            retVal.Add(new PaymentProperty() { Name = "Payment No", Value = PaymentNo.ToString() }); ;
+            retVal.Add(new PaymentProperty() { Name = "Payment", Value = Payment.ToString() });
+            retVal.Add(new PaymentProperty() { Name = "Interest", Value = Interest.ToString() });
+            retVal.Add(new PaymentProperty() { Name = "Principle", Value = Principle.ToString()});
+            retVal.Add(new PaymentProperty() { Name = "Insurance", Value = Insurance.ToString() });
+            retVal.Add(new PaymentProperty() { Name = "Tax", Value = Tax.ToString() });
+            retVal.Add(new PaymentProperty() { Name = "Balance", Value = Balance.ToString() });
+
+            return retVal;
         }
     }
 }

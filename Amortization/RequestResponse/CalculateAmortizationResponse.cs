@@ -10,6 +10,8 @@ namespace Amortization.RequestResponse
         [DataMember]
         public ObservableCollection<PaymentDetail> PaymentDetails { set; get; }
 
+        // ------------------------------------------------
+
         public CalculateAmortizationResponse()
         {
             PaymentDetails = new ObservableCollection<PaymentDetail>();

@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Drawing;
+using System.Drawing.Printing;
 using System.Windows;
 using System.Windows.Controls;
 
 using Amortization;
+using Amortization.RequestResponse;
 
 namespace WpfAmortization
 {
@@ -13,7 +16,9 @@ namespace WpfAmortization
     
     public partial class AmortWindow : Window
     {
-        private Amortization.RequestResponse.CalculateAmortizationResponse response;
+        private DataGridPrinter gridPrinter;
+        private PrintDocument printDocument;
+        private CalculateAmortizationResponse response;
 
         // ------------------------------------------------
 
@@ -21,6 +26,7 @@ namespace WpfAmortization
         {
             InitializeComponent();
             
+            printDocument = new PrintDocument();
             tbTax.Text = Properties.Settings.Default.Tax.ToString();
             tbAPR.Text = Properties.Settings.Default.Apr.ToString();
             tbPeriod.Text = Properties.Settings.Default.Period.ToString();
@@ -29,6 +35,19 @@ namespace WpfAmortization
             tbInsurance.Text = Properties.Settings.Default.Insurance.ToString();
             tbLoanAmount.Text = Properties.Settings.Default.LoanAmount.ToString();
             tbDownPayment.Text = Properties.Settings.Default.DownPayment.ToString();
+
+
+            printDocument.PrintPage += new System.Drawing.Printing.PrintPageEventHandler(PrintPage);
+
+            SetupGridPrinter();
+        }
+
+        // ------------------------------------------------
+
+        void SetupGridPrinter()
+        {
+            var font = new Font("Roboto", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+            gridPrinter = new DataGridPrinter(dgOut, printDocument, font);
         }
 
         // ------------------------------------------------
@@ -39,9 +58,9 @@ namespace WpfAmortization
 
             if(!string.IsNullOrEmpty(tbLoanAmount.Text) && double.TryParse(tbLoanAmount.Text, out reader) && reader > 0)
             {
-                AmortSvc svc = new AmortSvc();
+                var svc = new AmortSvc();
 
-                Amortization.RequestResponse.CalculateAmortizationRequest req = new Amortization.RequestResponse.CalculateAmortizationRequest();
+                var req = new CalculateAmortizationRequest();
 
                 // ----------------------------------------------------------------------
                 // Reader got the Loan Amount value in order to get into this code block.
@@ -61,14 +80,14 @@ namespace WpfAmortization
 
                 response = svc.CalculateAmortization(req);
 
-                double totalPayments = 0d;
-                double totalInterest = 0d;
-                double totalInsurance = 0d;
-                double totalTax = 0d;
+                var totalPayments = 0d;
+                var totalInterest = 0d;
+                var totalInsurance = 0d;
+                var totalTax = 0d;
 
-                double totalPrinciple = 0d;
+                var totalPrinciple = 0d;
 
-                foreach(PaymentDetail detail in response.PaymentDetails)
+                foreach(var detail in response.PaymentDetails)
                 {
                     totalPayments += detail.Payment;
                     totalInterest += detail.Interest;
@@ -118,7 +137,25 @@ namespace WpfAmortization
 
         private void OnPrint(object sender, RoutedEventArgs e)
         {
+            gridPrinter._pageNumber = 1;
+            gridPrinter._rowCount = 0;
 
+            printDocument.Print();
+        }
+
+
+        // ------------------------------------------------
+
+        private void PrintPage(object sender, PrintPageEventArgs e)
+        {
+            var graphics = e.Graphics;
+            var more = gridPrinter.DrawDataGrid(graphics);
+
+            if(more == true)
+            {
+                e.HasMorePages = true;
+                gridPrinter._pageNumber++;
+            }
         }
     }
 }
