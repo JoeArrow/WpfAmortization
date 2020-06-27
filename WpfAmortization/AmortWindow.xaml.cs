@@ -37,7 +37,7 @@ namespace WpfAmortization
             tbDownPayment.Text = Properties.Settings.Default.DownPayment.ToString();
 
 
-            printDocument.PrintPage += new System.Drawing.Printing.PrintPageEventHandler(PrintPage);
+            printDocument.PrintPage += new PrintPageEventHandler(PrintPage);
 
             SetupGridPrinter();
         }
@@ -46,7 +46,7 @@ namespace WpfAmortization
 
         void SetupGridPrinter()
         {
-            var font = new Font("Roboto", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+            var font = new Font("Roboto", 13F, System.Drawing.FontStyle.Regular, GraphicsUnit.Pixel, ((byte)(0)));
             gridPrinter = new DataGridPrinter(dgOut, printDocument, font);
         }
 
@@ -137,8 +137,8 @@ namespace WpfAmortization
 
         private void OnPrint(object sender, RoutedEventArgs e)
         {
-            gridPrinter._pageNumber = 1;
-            gridPrinter._rowCount = 0;
+            gridPrinter.PageNumber = 1;
+            gridPrinter.RowCount = 0;
 
             printDocument.Print();
         }
@@ -151,10 +151,10 @@ namespace WpfAmortization
             var graphics = e.Graphics;
             var more = gridPrinter.DrawDataGrid(graphics);
 
-            if(more == true)
+            if(more)
             {
                 e.HasMorePages = true;
-                gridPrinter._pageNumber++;
+                gridPrinter.PageNumber++;
             }
         }
     }

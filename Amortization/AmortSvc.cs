@@ -10,24 +10,22 @@ namespace Amortization
 
         public CalculateAmortizationResponse CalculateAmortization(CalculateAmortizationRequest req)
         {
-            CalculateAmortizationResponse retVal = new CalculateAmortizationResponse();
+            var retVal = new CalculateAmortizationResponse();
 
-            double rate = req.InterestRate;
-            double loanAmount = req.LoanAmount - req.DownPayment;
-            double interest = 0d;
-            double principle = 0d;
+            var rate = req.InterestRate;
+            var loanAmount = req.LoanAmount - req.DownPayment;
 
             // ---------------------------------------------------------
             // Tax and Insurance are constant, and are simply the Annual 
             // amount spread over twelve months.
 
-            double tax = (req.AnnualTax / 12);
-            double insurance = (req.AnnualInsurancePmt / 12);
+            var tax = (req.AnnualTax / 12);
+            var insurance = (req.AnnualInsurancePmt / 12);
 
-            double balance = req.LoanAmount;
-            double payment = (double) CalculatePayment(new CalculatePaymentRequest(req)).PaymentAmount;
+            var balance = req.LoanAmount;
+            var payment = (double) CalculatePayment(new CalculatePaymentRequest(req)).PaymentAmount;
 
-            int paymentNo = 0;
+            var paymentNo = 0;
             
             while(balance != 0 && balance > 0)
             {
@@ -42,7 +40,7 @@ namespace Amortization
                 // ------------------------------------------------------
                 // calculate interest rate based on remaining loan amount
 
-                interest = (loanAmount * rate) / 12;
+                var interest = (loanAmount * rate) / 12;
 
 
                 if(loanAmount < payment)
@@ -53,7 +51,7 @@ namespace Amortization
                 // -------------------------------------------------------------------
                 // calculate principle by subtracting the interest, tax, and insurance
 
-                principle = payment - interest - tax - insurance;
+                var principle = payment - interest - tax - insurance;
 
                 // -----------------------------------------------------------------------
                 // The new loan amount is the old loan amount minus the principal payment.
@@ -70,7 +68,7 @@ namespace Amortization
                     loanAmount = 0;
                 }
 
-                PaymentDetail detail = new PaymentDetail();
+                var detail = new PaymentDetail();
 
                 detail.PaymentNo = ++paymentNo;
 
@@ -91,12 +89,12 @@ namespace Amortization
 
         public CalculatePaymentResponse CalculatePayment(CalculatePaymentRequest req)
         {
-            CalculatePaymentResponse retVal = new CalculatePaymentResponse();
-            
+            var retVal = new CalculatePaymentResponse();
+
             // --------------------------------------------------------
             // plug the values from the input into the mortgage formula
 
-            double payment = (req.LoanAmount - req.DownPayment) * (Math.Pow((1 + req.InterestRate / 12), req.NumberOfPayments) * req.InterestRate) / (12 * (Math.Pow((1 + req.InterestRate / 12), req.NumberOfPayments) - 1));
+            var payment = (req.LoanAmount - req.DownPayment) * (Math.Pow((1 + req.InterestRate / 12), req.NumberOfPayments) * req.InterestRate) / (12 * (Math.Pow((1 + req.InterestRate / 12), req.NumberOfPayments) - 1));
 
             // ----------------------------------------------------
             // add on a monthly property tax and property insurance

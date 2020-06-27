@@ -29,22 +29,21 @@ namespace WpfAmortization
         private const int _cellMargin = 10;
         private PrintDocument _printDocument;
 
-        public int _rowCount = 0;
-        public int _pageNumber = 1;
-        public ArrayList _lines = new ArrayList();
-
         private int _topMargin;
         private int _pageWidth;
+        private int _pageHeight;
         private int _columnwidth;
-        private int _pPageHeight;
         private int _bottomMargin;
 
         private float _location = 10.0f;
         private Color _foreColor = Color.Black;
         private Color _backColor = Color.AliceBlue;
-        private Color _altBackColor = Color.LightGray;
         private Color _headerForeColor = Color.Black;
+        private Color _altBackColor = Color.LightGray;
         private Color _headerBackColor = Color.LightSkyBlue;
+
+        public int RowCount { set; get; } = 0;
+        public int PageNumber { set; get; } = 1;
 
         // ------------------------------------------------
 
@@ -56,21 +55,21 @@ namespace WpfAmortization
 
             _topMargin = _printDocument.DefaultPageSettings.Margins.Top;
             _bottomMargin = _printDocument.DefaultPageSettings.Margins.Bottom;
-            _pPageHeight = _printDocument.DefaultPageSettings.PaperSize.Height;
+            _pageHeight = _printDocument.DefaultPageSettings.PaperSize.Height;
 
             _pageWidth = _printDocument.DefaultPageSettings.PaperSize.Width;
-            _columnwidth = _pageWidth / _dataGrid.Columns.Count;
+            _columnwidth = (_pageWidth / _dataGrid.Columns.Count) - (_dataGrid.Columns.Count * 2);
         }
 
         // ------------------------------------------------
 
-        void DrawHorizontalLines(Graphics graphics, ArrayList lines)
+        void DrawHorizontalLines(Graphics graphics, ArrayList lineBottoms)
         {
             var linePen = new Pen(_backColor, 1);
 
-            for(var i = 0; i < lines.Count; i++)
+            foreach(float lineBottom in lineBottoms)
             {
-                graphics.DrawLine(linePen, _location, (float)lines[i], _pageWidth, (float)lines[i]);
+                graphics.DrawLine(linePen, _location, lineBottom, _pageWidth, lineBottom);
             }
         }
 
@@ -112,50 +111,50 @@ namespace WpfAmortization
 
         public void DrawHeader(Graphics graphics)
         {
-            var initialRowCount = _rowCount;
-            var cellformat = new StringFormat();
+            var initialRowCount = RowCount;
+            var cellFormat = new StringFormat();
             var linePen = new Pen(_backColor, 1);
             var foreBrush = new SolidBrush(_headerForeColor);
             var backBrush = new SolidBrush(_headerBackColor);
 
-            cellformat.Trimming = StringTrimming.EllipsisCharacter;
-            cellformat.FormatFlags = StringFormatFlags.NoWrap | StringFormatFlags.LineLimit;
+            cellFormat.Trimming = StringTrimming.EllipsisCharacter;
+            cellFormat.FormatFlags = StringFormatFlags.NoWrap | StringFormatFlags.LineLimit;
 
             // ---------------------
             // draw the table header
 
-            var startxposition = _location;
+            var startXPosition = _location;
 
-            var HeaderBounds = new RectangleF(0, 0, 0, 0);
-            var nextcellbounds = new RectangleF(0, 0, 0, 0);
+            var headerBounds = new RectangleF(0, 0, 0, 0);
+            var nextCellBounds = new RectangleF(0, 0, 0, 0);
 
-            HeaderBounds.X = _location;
-            HeaderBounds.Y = _location + _topMargin +
-                             (_rowCount - initialRowCount) * (_font.SizeInPoints + _cellMargin);
+            headerBounds.X = _location;
+            headerBounds.Y = _location + _topMargin +
+                             (RowCount - initialRowCount) * (_font.SizeInPoints + _cellMargin);
 
-            HeaderBounds.Height = _font.SizeInPoints + _cellMargin;
-            HeaderBounds.Width = _pageWidth;
+            headerBounds.Height = _font.SizeInPoints + _cellMargin;
+            headerBounds.Width = _pageWidth;
 
-            graphics.FillRectangle(backBrush, HeaderBounds);
+            graphics.FillRectangle(backBrush, headerBounds);
 
             foreach(var property in new PaymentDetail().GetProperties())
             {
-                var cellbounds = new RectangleF(startxposition,
+                var cellbounds = new RectangleF(startXPosition,
                                                 _location + _topMargin +
-                                                (_rowCount - initialRowCount) * (_font.SizeInPoints + _cellMargin),
+                                                (RowCount - initialRowCount) * (_font.SizeInPoints + _cellMargin),
                                                 _columnwidth,
                                                 _font.SizeInPoints + _cellMargin);
-                nextcellbounds = cellbounds;
+                nextCellBounds = cellbounds;
 
-                if(startxposition + _columnwidth <= _pageWidth + 25)
+                if(startXPosition + _columnwidth <= _pageWidth)
                 {
-                    graphics.DrawString(property.Name, _font, foreBrush, cellbounds, cellformat);
+                    graphics.DrawString(property.Name, _font, foreBrush, cellbounds, cellFormat);
                 }
 
-                startxposition = startxposition + _columnwidth;
+                startXPosition += _columnwidth;
             }
 
-            graphics.DrawLine(linePen, _location, nextcellbounds.Bottom, _pageWidth, nextcellbounds.Bottom);
+            graphics.DrawLine(linePen, _location, nextCellBounds.Bottom, _pageWidth, nextCellBounds.Bottom);
         }
 
         // ------------------------------------------------
@@ -163,23 +162,24 @@ namespace WpfAmortization
         public bool DrawRows(Graphics graphics)
         {
             var lastRowBottom = _topMargin;
+            var lineBottoms = new ArrayList();
 
             try
             {
-                var ForeBrush = new SolidBrush(_foreColor);
-                var BackBrush = new SolidBrush(_backColor);
-                var AlternatingBackBrush = new SolidBrush(_altBackColor);
-                var TheLinePen = new Pen(_backColor, 1);
+                var theLinePen = new Pen(_backColor, 1);
+                var foreBrush = new SolidBrush(_foreColor);
+                var backBrush = new SolidBrush(_backColor);
+                var alternatingBackBrush = new SolidBrush(_altBackColor);
 
-                var cellformat = new StringFormat()
+                var cellFormat = new StringFormat()
                 {
                     Trimming = StringTrimming.EllipsisCharacter,
                     FormatFlags = StringFormatFlags.NoWrap | StringFormatFlags.LineLimit,
                 };
 
-                var initialRowCount = _rowCount;
+                var initialRowCount = RowCount;
 
-                var RowBounds = new RectangleF(0, 0, 0, 0);
+                var rowBounds = new RectangleF(0, 0, 0, 0);
 
                 // -------------------
                 // draw vertical lines
@@ -191,53 +191,52 @@ namespace WpfAmortization
 
                     if(paymentDetail != null)
                     {
-                        var startxposition = _location;
+                        var startXPosition = _location;
 
-                        RowBounds.X = _location;
+                        rowBounds.X = _location;
 
-                        RowBounds.Y = _location + _topMargin +
-                                      ((_rowCount - initialRowCount) + 1) * (_font.SizeInPoints + _cellMargin);
+                        rowBounds.Y = _location + _topMargin +
+                                      ((RowCount - initialRowCount) + 1) * (_font.SizeInPoints + _cellMargin);
 
-                        RowBounds.Width = _pageWidth;
-                        RowBounds.Height = _font.SizeInPoints + _cellMargin;
+                        rowBounds.Width = _pageWidth;
+                        rowBounds.Height = _font.SizeInPoints + _cellMargin;
 
-                        _lines.Add(RowBounds.Bottom);
+                        lineBottoms.Add(rowBounds.Bottom);
 
-                        graphics.FillRectangle((index % 2 == 0) ? AlternatingBackBrush : BackBrush, RowBounds);
+                        graphics.FillRectangle((index % 2 == 0) ? alternatingBackBrush : backBrush, rowBounds);
 
                         foreach(var property in paymentDetail.GetProperties())
                         {
-                            var cellbounds = new RectangleF(startxposition,
+                            var cellBounds = new RectangleF(startXPosition,
                                                             _location + _topMargin +
-                                                            ((_rowCount - initialRowCount) + 1) * (_font.SizeInPoints + _cellMargin),
+                                                            ((RowCount - initialRowCount) + 1) * (_font.SizeInPoints + _cellMargin),
                                                             _columnwidth,
                                                             _font.SizeInPoints + _cellMargin);
 
-                            if(startxposition + _columnwidth <= _pageWidth + 25)
+                            if(startXPosition + _columnwidth <= _pageWidth)
                             {
-                                graphics.DrawString(property.Value, _font, ForeBrush, cellbounds, cellformat);
-                                lastRowBottom = (int)cellbounds.Bottom;
+                                graphics.DrawString(property.Value, _font, foreBrush, cellBounds, cellFormat);
+                                lastRowBottom = (int)cellBounds.Bottom;
                             }
 
-                            startxposition = startxposition + _columnwidth;
+                            startXPosition += _columnwidth;
                         }
 
-                        _rowCount++;
+                        RowCount++;
 
-                        if(_rowCount * (_font.SizeInPoints + _cellMargin) > (_pPageHeight * _pageNumber) - (_bottomMargin + _topMargin))
+                        if(RowCount * (_font.SizeInPoints + _cellMargin) > (_pageHeight * PageNumber) - (_bottomMargin + _topMargin))
                         {
-                            DrawHorizontalLines(graphics, _lines);
-                            DrawVerticalGridLines(graphics, TheLinePen, _columnwidth, lastRowBottom);
+                            DrawHorizontalLines(graphics, lineBottoms);
+                            DrawVerticalGridLines(graphics, theLinePen, _columnwidth, lastRowBottom);
                             return true;
                         }
                     }
                 }
 
-                DrawHorizontalLines(graphics, _lines);
-                DrawVerticalGridLines(graphics, TheLinePen, _columnwidth, lastRowBottom);
+                DrawHorizontalLines(graphics, lineBottoms);
+                DrawVerticalGridLines(graphics, theLinePen, _columnwidth, lastRowBottom);
 
-                return false;
-
+                return false; 
             }
             catch(Exception ex)
             {
